@@ -71,14 +71,14 @@ jobs:
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' && contains(github.ref, 'refs/tags/') }}
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Sign image with a key
-        if: ${{ github.event_name != 'pull_request' && contains(github.ref, 'refs/tags/') }}
+        if: ${{ github.event_name != 'pull_request' }}
         run: |
           cosign sign --yes --key env://COSIGN_PRIVATE_KEY "${TAGS}@${DIGEST}"
         env:
@@ -88,7 +88,7 @@ jobs:
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
 
       - name: Sign the images with GitHub OIDC Token
-        if: ${{ github.event_name != 'pull_request' && contains(github.ref, 'refs/tags/') }}
+        if: ${{ github.event_name != 'pull_request' }}
         env:
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
           TAGS: ${{ steps.docker_meta.outputs.tags }}
